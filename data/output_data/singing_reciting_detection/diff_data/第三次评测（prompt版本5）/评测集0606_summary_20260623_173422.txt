@@ -1,0 +1,19 @@
+评测时间: 2026-06-23 17:34:22
+评测集: /Users/para_fish66/Desktop/语音评论/data/testing_data/singing_reciting_detection/评测集0606.csv
+Prompt: /Users/para_fish66/Desktop/语音评论/prompt/singing_reciting_detection/版本5.txt
+模型: ep-d77edo-1782128122468111756
+
+总评测条数: 1040
+正确条数:   949
+错误条数:   91
+准确率:     91.25%
+
+--- 唱歌/朗诵(1) 核心指标 ---
+真实为1总数:  404
+预测为1总数:  365
+TP(真实1→预测1): 339
+FP(真实0→预测1): 26
+FN(真实1→预测0): 65
+精确率(Precision): 339/365 = 92.88%
+召回率(Recall):     339/404 = 83.91%
+F1:                 88.17%

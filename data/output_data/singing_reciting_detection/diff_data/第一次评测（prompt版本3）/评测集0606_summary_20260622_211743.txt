@@ -1,0 +1,19 @@
+评测时间: 2026-06-22 21:17:43
+评测集: /Users/para_fish66/Desktop/语音评论/data/testing_data/binary_catagorizing/评测集0606.csv
+Prompt: /Users/para_fish66/Desktop/语音评论/prompt/binary_catagorizing/版本3.txt
+模型: ep-d77edo-1782128122468111756
+
+总评测条数: 1040
+正确条数:   879
+错误条数:   161
+准确率:     84.52%
+
+--- 唱歌/朗诵(1) 核心指标 ---
+真实为1总数:  386
+预测为1总数:  382
+TP(真实1→预测1): 324
+FP(真实0→预测1): 58
+FN(真实1→预测0): 62
+精确率(Precision): 324/382 = 84.82%
+召回率(Recall):     324/386 = 83.94%
+F1:                 84.38%

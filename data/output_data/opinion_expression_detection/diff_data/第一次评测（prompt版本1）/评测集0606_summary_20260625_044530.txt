@@ -1,0 +1,19 @@
+评测时间: 2026-06-25 04:45:30
+评测集: /Users/para_fish66/Desktop/语音评论/data/testing_data/opinion_expression_detection/评测集0606.csv
+Prompt: /Users/para_fish66/Desktop/语音评论/prompt/opinion_expression_detection/版本1.txt
+模型: ep-d77edo-1782128122468111756
+
+总评测条数: 1032
+正确条数:   990
+错误条数:   42
+准确率:     95.93%
+
+--- 观点表达(1) 核心指标 ---
+真实为1总数:  26
+预测为1总数:  25
+TP(真实1→预测1): 5
+FP(真实0→预测1): 20
+FN(真实1→预测0): 21
+精确率(Precision): 5/25 = 20.00%
+召回率(Recall):     5/26 = 19.23%
+F1:                 19.61%
