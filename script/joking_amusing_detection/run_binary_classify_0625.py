@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pyright: reportUnusedCallResult=false, reportImplicitStringConcatenation=false, reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownParameterType=false, reportAny=false
 """
-语音评论「发语音玩」二分类批量评测脚本
+语音评论「搞笑/玩梗」二分类批量评测脚本（评测集0625）
 - 每次请求处理 20 条数据（可通过 --batch-size 调整）
 - 支持续传（断点续传），中断后重新运行自动跳过已处理行
 - 运行结束后自动计算正确率并生成 diff 文件
@@ -45,10 +45,10 @@ MAX_RETRIES = 5
 RETRY_DELAY = 5
 
 # 默认路径
-DEFAULT_PROMPT = "/Users/para_fish66/Desktop/语音评论/prompt/voice_comment_testing_detection/版本2.txt"
-DEFAULT_INPUT = "/Users/para_fish66/Desktop/语音评论/data/testing_data/voice_comment_testing_detection/评测集0606.csv"
-DEFAULT_EVAL_DIR = "/Users/para_fish66/Desktop/语音评论/data/output_data/voice_comment_testing_detection/eval_data"
-DEFAULT_DIFF_DIR = "/Users/para_fish66/Desktop/语音评论/data/output_data/voice_comment_testing_detection/diff_data"
+DEFAULT_PROMPT = "/Users/para_fish66/Desktop/语音评论/prompt/joking_amusing_detection/版本4.txt"
+DEFAULT_INPUT = "/Users/para_fish66/Desktop/语音评论/data/testing_data/joking_amusing_detection/评测集0625.csv"
+DEFAULT_EVAL_DIR = "/Users/para_fish66/Desktop/语音评论/data/output_data/joking_amusing_detection/eval_data"
+DEFAULT_DIFF_DIR = "/Users/para_fish66/Desktop/语音评论/data/output_data/joking_amusing_detection/diff_data"
 # ==============================
 
 
@@ -96,7 +96,7 @@ def build_batch_prompt(prompt_template: str, batch: list[dict[str, str]]) -> str
         "数组中每个元素对应一条样本（按顺序对应样本1、样本2、...），格式如下：\n"
         "```json\n"
         "[\n"
-        '  {"voiceId": "<原样回填>", "voice_asr_text": "<原样回填>", "label": 0或1, "label_name": "发语音玩"或"非发语音玩", "reason": "<不超过80字的中文理由>"},\n'
+        '  {"voiceId": "<原样回填>", "voice_asr_text": "<原样回填>", "label": 0或1, "label_name": "搞笑/玩梗"或"非搞笑/玩梗", "reason": "<不超过80字的中文理由>"},\n'
         "  ...\n"
         "]\n"
         "```\n"
@@ -129,6 +129,8 @@ def call_api(prompt: str) -> str:
                 body = resp.read().decode("utf-8")
                 data = json.loads(body)
                 msg = data["choices"][0]["message"]
+                # DeepSeek 模型可能将正式输出放在 content，
+                # 思考过程放在 reasoning_content；若 content 为空则尝试 reasoning_content
                 content = msg.get("content", "") or ""
                 if not content.strip():
                     rc = msg.get("reasoning_content", "") or ""
@@ -150,9 +152,10 @@ def call_api(prompt: str) -> str:
             else:
                 raise
         except (urllib.error.URLError, OSError, ConnectionResetError, ValueError) as e:
+            # OSError 包含 ConnectionResetError, BrokenPipeError 等网络异常
             print(f"  [重试 {attempt}/{MAX_RETRIES}] 网络错误: {e}")
             if attempt < MAX_RETRIES:
-                time.sleep(RETRY_DELAY * 2)
+                time.sleep(RETRY_DELAY * 2)  # 网络错误加倍等待
             else:
                 raise
         except (KeyError, IndexError, json.JSONDecodeError) as e:
@@ -255,15 +258,16 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
     """
     运行结束后：
     1. 计算正确率（将 pred_label 与原始 CSV 中的 真实标签二分类 对比）
-    2. 重点计算 label=1（发语音玩）的精确率和召回率
+    2. 重点计算 label=1（搞笑/玩梗）的精确率和召回率
     3. 生成 diff 文件（仅包含预测错误的行）
     """
+    # 加载原始数据（含真实标签）
     original = load_csv_data(input_path)
     truth_map: dict[str, dict[str, str]] = {}
     for row in original:
         vid = row.get("voice_resource_id", "")
-        truth_label = row.get("真实标签二分类", "").strip()
-        intent = row.get("意图表达", "").strip()
+        truth_label = row.get("true_label", "").strip()
+        intent = row.get("true_label_name", "").strip()
         asr = row.get("voice_asr_text", "")
         if vid:
             truth_map[vid] = {
@@ -272,18 +276,20 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
                 "asr_text": asr,
             }
 
+    # 加载预测结果
     preds = load_csv_data(eval_path)
 
     total = 0
     correct = 0
     diff_rows: list[dict[str, str]] = []
 
-    tp1 = 0
-    fp1 = 0
-    fn1 = 0
-    tn1 = 0
-    real_1_total = 0
-    pred_1_total = 0
+    # ===== 混淆矩阵统计（以 label=1 为正例）=====
+    tp1 = 0  # 真实1，预测1（True Positive）
+    fp1 = 0  # 真实0，预测1（False Positive）
+    fn1 = 0  # 真实1，预测0（False Negative）
+    tn1 = 0  # 真实0，预测0（True Negative）
+    real_1_total = 0  # 真实为1的总数
+    pred_1_total = 0  # 预测为1的总数
 
     for pred in preds:
         vid = pred.get("voice_resource_id", "")
@@ -297,6 +303,7 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
         truth = truth_map[vid]
         true_label = truth["true_label"]
 
+        # 跳过预测异常的行
         if pred_label == "-1":
             total += 1
             diff_rows.append({
@@ -315,6 +322,7 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
         if pred_label == true_label:
             correct += 1
 
+        # 混淆矩阵
         if true_label == "1":
             real_1_total += 1
             if pred_label == "1":
@@ -322,7 +330,7 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
                 pred_1_total += 1
             else:
                 fn1 += 1
-        else:
+        else:  # true_label == "0"
             if pred_label == "1":
                 fp1 += 1
                 pred_1_total += 1
@@ -330,7 +338,7 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
                 tn1 += 1
 
         if pred_label != true_label:
-            true_name = "发语音玩" if true_label == "1" else "非发语音玩"
+            true_name = "搞笑/玩梗" if true_label == "1" else "非搞笑/玩梗"
             diff_rows.append({
                 "voice_resource_id": vid,
                 "voice_asr_text": pred.get("voice_asr_text", ""),
@@ -342,12 +350,15 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
                 "error_type": "误判",
             })
 
+    # 计算正确率
     accuracy = correct / total * 100 if total > 0 else 0
 
+    # label=1 的精确率与召回率
     precision_1 = tp1 / (tp1 + fp1) * 100 if (tp1 + fp1) > 0 else 0
     recall_1 = tp1 / (tp1 + fn1) * 100 if (tp1 + fn1) > 0 else 0
     f1_1 = 2 * precision_1 * recall_1 / (precision_1 + recall_1) if (precision_1 + recall_1) > 0 else 0
 
+    # 生成 diff 文件
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     input_stem = Path(input_path).stem
     diff_path = os.path.join(diff_dir, f"{input_stem}_diff_{timestamp}.csv")
@@ -364,6 +375,7 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
         writer.writeheader()
         writer.writerows(diff_rows)
 
+    # 打印统计
     print(f"\n{'=' * 60}")
     print(f"📊 准确率统计")
     print(f"{'=' * 60}")
@@ -372,7 +384,7 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
     print(f"   错误条数:    {total - correct}")
     print(f"   准确率:      {accuracy:.2f}%")
     print(f"")
-    print(f"   --- 发语音玩(1) 核心指标 ---")
+    print(f"   --- 搞笑/玩梗(1) 核心指标 ---")
     print(f"   真实为1总数:  {real_1_total}")
     print(f"   预测为1总数:  {pred_1_total}")
     print(f"   TP(真实1→预测1): {tp1}")
@@ -386,6 +398,7 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
     print(f"📁 diff 文件: {diff_path}")
     print(f"   共 {len(diff_rows)} 条预测错误记录")
 
+    # 同时将准确率写入一个摘要文件
     summary_path = os.path.join(diff_dir, f"{input_stem}_summary_{timestamp}.txt")
     summary_text = (
         f"评测时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
@@ -398,7 +411,7 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
         f"错误条数:   {total - correct}\n"
         f"准确率:     {accuracy:.2f}%\n"
         f"\n"
-        f"--- 发语音玩(1) 核心指标 ---\n"
+        f"--- 搞笑/玩梗(1) 核心指标 ---\n"
         f"真实为1总数:  {real_1_total}\n"
         f"预测为1总数:  {pred_1_total}\n"
         f"TP(真实1→预测1): {tp1}\n"
@@ -417,7 +430,7 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="语音评论「发语音玩」二分类批量评测脚本")
+    parser = argparse.ArgumentParser(description="语音评论「搞笑/玩梗」二分类批量评测脚本")
     parser.add_argument(
         "--prompt", type=str, default=DEFAULT_PROMPT,
         help="Prompt 模板文件路径"
@@ -435,8 +448,8 @@ def main():
         help="diff 文件输出目录"
     )
     parser.add_argument(
-        "--run-name", type=str, default="第二次评测（prompt版本2）",
-        help="本次评测名称（默认: 第二次评测（prompt版本2））"
+        "--run-name", type=str, default="第五次评测（测试集0625）",
+        help="本次评测名称（默认: 第五次评测（测试集0625））"
     )
     parser.add_argument(
         "--batch-size", type=int, default=BATCH_SIZE,
@@ -444,6 +457,7 @@ def main():
     )
     args = parser.parse_args()
 
+    # 构造输出子目录：eval_data/<run_name>/, diff_data/<run_name>/
     input_stem = Path(args.input).stem
     eval_subdir = os.path.join(args.eval_dir, args.run_name)
     diff_subdir = os.path.join(args.diff_dir, args.run_name)
@@ -452,7 +466,7 @@ def main():
 
     eval_path = os.path.join(eval_subdir, f"{input_stem}_result.csv")
 
-    # 断点续传：检查 diff_data/<run_name>/ 下是否已有 summary
+    # ======== 断点续传：检查 diff_data/<run_name>/ 下是否已有 summary ========
     if os.path.exists(diff_subdir):
         try:
             all_files = os.listdir(diff_subdir)
@@ -465,6 +479,7 @@ def main():
             print(f"   已有 summary: {summary_files[0]}")
             return
 
+    # 加载 prompt 和数据
     print(f"📄 加载 Prompt: {args.prompt}")
     prompt_template = load_prompt_template(args.prompt)
 
@@ -476,6 +491,7 @@ def main():
     print(f"   结果输出到: {eval_subdir}")
     print(f"   diff 输出到: {diff_subdir}")
 
+    # 断点续传（逐行跳过已处理数据）
     done_ids = load_progress(eval_path)
     already_done = len(done_ids)
     if already_done > 0:
@@ -488,6 +504,7 @@ def main():
     processed_this_run = 0
     error_count = 0
 
+    # ======== 批量评测 ========
     for start in range(0, total, batch_size):
         end = min(start + batch_size, total)
         batch = all_rows[start:end]
@@ -525,7 +542,7 @@ def main():
         pos = labels.count("1")
         neg = labels.count("0")
         err = labels.count("-1")
-        print(f"  ✅ 完成: 发语音玩={pos}, 非发语音玩={neg}, 异常={err}")
+        print(f"  ✅ 完成: 搞笑/玩梗={pos}, 非搞笑/玩梗={neg}, 异常={err}")
         print(f"   📈 本次运行已处理: {processed_this_run} | 累计已处理: {len(done_ids)}/{total}")
 
         time.sleep(1)
@@ -538,6 +555,7 @@ def main():
     print(f"   异常: {error_count} 条")
     print(f"   结果文件: {eval_path}")
 
+    # ======== 计算正确率 & 生成 diff ========
     if len(done_ids) < total:
         missing = total - len(done_ids)
         print(f"\n⚠️  还有 {missing} 条数据未处理，正确率统计将基于已处理数据")

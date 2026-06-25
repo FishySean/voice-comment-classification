@@ -1,0 +1,19 @@
+评测时间: 2026-06-25 18:55:20
+评测集: /Users/para_fish66/Desktop/语音评论/data/testing_data/voice_comment_testing_detection/评测集0606.csv
+Prompt: /Users/para_fish66/Desktop/语音评论/prompt/voice_comment_testing_detection/版本2.txt
+模型: ep-d77edo-1782128122468111756
+
+总评测条数: 1032
+正确条数:   873
+错误条数:   159
+准确率:     84.59%
+
+--- 发语音玩(1) 核心指标 ---
+真实为1总数:  145
+预测为1总数:  80
+TP(真实1→预测1): 33
+FP(真实0→预测1): 47
+FN(真实1→预测0): 112
+精确率(Precision): 33/80 = 41.25%
+召回率(Recall):     33/145 = 22.76%
+F1:                 29.33%

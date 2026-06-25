@@ -21,6 +21,20 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 from datetime import datetime
+import pathlib
+
+def _load_env():
+    """从 .env 文件加载环境变量（无需 python-dotenv）"""
+    env_path = pathlib.Path(__file__).resolve().parent.parent.parent / ".env"
+    if env_path.exists():
+        for line in env_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip())
+
+_load_env()
 
 # ============ 配置 ============
 API_KEY = os.environ.get("WQ_API_KEY", "")
@@ -31,8 +45,8 @@ MAX_RETRIES = 5
 RETRY_DELAY = 5
 
 # 默认路径
-DEFAULT_PROMPT = "/Users/para_fish66/Desktop/语音评论/prompt/joking_amusing_detection/版本4.txt"
-DEFAULT_INPUT = "/Users/para_fish66/Desktop/语音评论/data/testing_data/joking_amusing_detection/评测集0606.csv"
+DEFAULT_PROMPT = "/Users/para_fish66/Desktop/语音评论/prompt/joking_amusing_detection/版本6.txt"
+DEFAULT_INPUT = "/Users/para_fish66/Desktop/语音评论/data/testing_data/joking_amusing_detection/评测集0606_v3.csv"
 DEFAULT_EVAL_DIR = "/Users/para_fish66/Desktop/语音评论/data/output_data/joking_amusing_detection/eval_data"
 DEFAULT_DIFF_DIR = "/Users/para_fish66/Desktop/语音评论/data/output_data/joking_amusing_detection/diff_data"
 # ==============================
@@ -434,8 +448,8 @@ def main():
         help="diff 文件输出目录"
     )
     parser.add_argument(
-        "--run-name", type=str, default="第四次评测（prompt版本4）",
-        help="本次评测名称（默认: 第四次评测（prompt版本4））"
+        "--run-name", type=str, default="第八次评测（prompt版本6，评测集0606_v3）",
+        help="本次评测名称（默认: 第八次评测（prompt版本6，评测集0606_v3））"
     )
     parser.add_argument(
         "--batch-size", type=int, default=BATCH_SIZE,

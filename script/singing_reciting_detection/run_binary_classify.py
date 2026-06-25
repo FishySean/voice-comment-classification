@@ -21,6 +21,20 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 from datetime import datetime
+import pathlib
+
+def _load_env():
+    """从 .env 文件加载环境变量（无需 python-dotenv）"""
+    env_path = pathlib.Path(__file__).resolve().parent.parent.parent / ".env"
+    if env_path.exists():
+        for line in env_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip())
+
+_load_env()
 
 # ============ 配置 ============
 API_KEY = os.environ.get("WQ_API_KEY", "")

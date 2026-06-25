@@ -8,3 +8,6 @@
 __pycache__/
 *.pyc
 .venv/
+
+# 环境变量（含 API key，不上传）
+.env
