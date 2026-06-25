@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# IDE
+.codeflicker/
+
+# 评测结果输出（可随时重新跑）
+data/output_data/
+
+# 源数据 xlsx（含内部数据，不公开）
+data/*.xlsx
+data/new_bare_data/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
