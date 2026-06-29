@@ -1,0 +1,14 @@
+标注时间: 2026-06-26 17:18:30
+空白数据: /Users/para_fish66/Desktop/语音评论/data/new_bare_data/空白数据0626_1.csv
+Prompt: /Users/para_fish66/Desktop/语音评论/prompt/singing_reciting_detection/版本6.txt
+模型: ep-d77edo-1782128122468111756
+本次标注名称: 第三次空白标注（空白数据0626_1 1001-1500）
+
+数据范围: 第 1001 ~ 1500 条
+实际处理: 500 条
+
+--- 预测分布 ---
+唱歌/朗诵(pred=1): 16
+非唱歌/朗诵(pred=0): 424
+异常(pred=-1): 20
+正例比例: 16/500 = 3.20%

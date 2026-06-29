@@ -1,0 +1,19 @@
+评测时间: 2026-06-26 02:07:01
+评测集: /Users/para_fish66/Desktop/语音评论/data/testing_data/social_interaction_detection/评测集0606_v2.csv
+Prompt: /Users/para_fish66/Desktop/语音评论/prompt/social_interaction_detection/版本2.txt
+模型: ep-d77edo-1782128122468111756
+
+总评测条数: 1155
+正确条数:   1016
+错误条数:   139
+准确率:     87.97%
+
+--- 社交互动(1) 核心指标 ---
+真实为1总数:  147
+预测为1总数:  24
+TP(真实1→预测1): 16
+FP(真实0→预测1): 8
+FN(真实1→预测0): 131
+精确率(Precision): 16/24 = 66.67%
+召回率(Recall):     16/147 = 10.88%
+F1:                 18.71%

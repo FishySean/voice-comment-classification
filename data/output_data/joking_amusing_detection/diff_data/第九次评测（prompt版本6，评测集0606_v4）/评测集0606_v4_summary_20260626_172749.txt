@@ -1,0 +1,19 @@
+评测时间: 2026-06-26 17:27:49
+评测集: /Users/para_fish66/Desktop/语音评论/data/testing_data/joking_amusing_detection/评测集0606_v4.csv
+Prompt: /Users/para_fish66/Desktop/语音评论/prompt/joking_amusing_detection/版本6.txt
+模型: ep-d77edo-1782128122468111756
+
+总评测条数: 1040
+正确条数:   777
+错误条数:   263
+准确率:     74.71%
+
+--- 搞笑/玩梗(1) 核心指标 ---
+真实为1总数:  333
+预测为1总数:  112
+TP(真实1→预测1): 91
+FP(真实0→预测1): 21
+FN(真实1→预测0): 242
+精确率(Precision): 91/112 = 81.25%
+召回率(Recall):     91/333 = 27.33%
+F1:                 40.90%

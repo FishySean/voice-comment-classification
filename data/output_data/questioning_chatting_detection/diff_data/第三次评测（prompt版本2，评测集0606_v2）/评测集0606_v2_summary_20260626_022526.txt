@@ -1,0 +1,19 @@
+评测时间: 2026-06-26 02:25:26
+评测集: /Users/para_fish66/Desktop/语音评论/data/testing_data/questioning_chatting_detection/评测集0606_v2.csv
+Prompt: /Users/para_fish66/Desktop/语音评论/prompt/questioning_chatting_detection/版本2.txt
+模型: ep-d77edo-1782128122468111756
+
+总评测条数: 1238
+正确条数:   1090
+错误条数:   148
+准确率:     88.05%
+
+--- 提问/互动(1) 核心指标 ---
+真实为1总数:  249
+预测为1总数:  192
+TP(真实1→预测1): 147
+FP(真实0→预测1): 45
+FN(真实1→预测0): 102
+精确率(Precision): 147/192 = 76.56%
+召回率(Recall):     147/249 = 59.04%
+F1:                 66.67%

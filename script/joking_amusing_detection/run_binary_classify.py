@@ -46,7 +46,7 @@ RETRY_DELAY = 5
 
 # 默认路径
 DEFAULT_PROMPT = "/Users/para_fish66/Desktop/语音评论/prompt/joking_amusing_detection/版本6.txt"
-DEFAULT_INPUT = "/Users/para_fish66/Desktop/语音评论/data/testing_data/joking_amusing_detection/评测集0606_v3.csv"
+DEFAULT_INPUT = "/Users/para_fish66/Desktop/语音评论/data/testing_data/joking_amusing_detection/评测集0606_v4.csv"
 DEFAULT_EVAL_DIR = "/Users/para_fish66/Desktop/语音评论/data/output_data/joking_amusing_detection/eval_data"
 DEFAULT_DIFF_DIR = "/Users/para_fish66/Desktop/语音评论/data/output_data/joking_amusing_detection/diff_data"
 # ==============================
@@ -448,8 +448,8 @@ def main():
         help="diff 文件输出目录"
     )
     parser.add_argument(
-        "--run-name", type=str, default="第八次评测（prompt版本6，评测集0606_v3）",
-        help="本次评测名称（默认: 第八次评测（prompt版本6，评测集0606_v3））"
+        "--run-name", type=str, default="第八次评测（prompt版本6，评测集0606_v4）",
+        help="本次评测名称（默认: 第八次评测（prompt版本6，评测集0606_v4））"
     )
     parser.add_argument(
         "--batch-size", type=int, default=BATCH_SIZE,
