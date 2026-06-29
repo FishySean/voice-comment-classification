@@ -254,7 +254,7 @@ def append_results(output_path: str, results: list[dict[str, str]], write_header
         writer.writerows(results)
 
 
-def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
+def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str, prompt_path: str = ""):
     """
     运行结束后：
     1. 计算正确率（将 pred_label 与原始 CSV 中的 真实标签二分类 对比）
@@ -403,7 +403,7 @@ def compute_accuracy_and_diff(input_path: str, eval_path: str, diff_dir: str):
     summary_text = (
         f"评测时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
         f"评测集: {input_path}\n"
-        f"Prompt: {DEFAULT_PROMPT}\n"
+        f"Prompt: {prompt_path}\n"
         f"模型: {ENDPOINT_ID}\n"
         f"\n"
         f"总评测条数: {total}\n"
@@ -561,7 +561,7 @@ def main():
         print(f"\n⚠️  还有 {missing} 条数据未处理，正确率统计将基于已处理数据")
     
     print(f"\n📊 开始计算正确率并生成 diff 文件...")
-    _ = compute_accuracy_and_diff(args.input, eval_path, diff_subdir)
+    _ = compute_accuracy_and_diff(args.input, eval_path, diff_subdir, args.prompt)
 
 
 if __name__ == "__main__":
