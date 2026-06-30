@@ -40,7 +40,7 @@ _load_env()
 API_KEY = os.environ.get("WQ_API_KEY", "")
 ENDPOINT_ID = "ep-d77edo-1782128122468111756"
 BASE_URL = "https://wanqing-api.corp.kuaishou.com/api/gateway/v1"
-BATCH_SIZE = 20
+BATCH_SIZE = 40
 MAX_RETRIES = 5
 RETRY_DELAY = 5
 
